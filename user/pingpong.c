@@ -1,55 +1,44 @@
 #include "kernel/types.h"
+#include "kernel/stat.h"
 #include "user/user.h"
 
-int main(void)
-{
-    int parent2child[2];
-    int child2parent[2];
-    pipe(parent2child);
-    pipe(child2parent);
+int main(int argc, char *argv[]) {
+    int p1[2]; // Pipe: parent writes, child reads
+    int p2[2]; // Pipe: child writes, parent reads
+    char recv_buf[5]; // Buffer for received messages
+    int status;
 
-    int pid = fork();
+    pipe(p1); // Create pipe for parent -> child
+    pipe(p2); // Create pipe for child -> parent
 
-    if (pid == 0) 
-    {
-        // --- Child ---
-        char buf[1];
+    if (fork() == 0) {
+        // --- Child process ---
+        close(p1[1]); // Close unused write end of p1
+        read(p1[0], recv_buf, 4); // Read "ping"
+        recv_buf[4] = '\0';
+        close(p1[0]);
 
-        // Đóng các đầu không dùng để tránh deadlock
-        close(parent2child[1]); // đóng đầu ghi của parent2child
-        close(child2parent[0]); // đóng đầu đọc của child2parent
+        printf("%d: received %s\n", getpid(), recv_buf);
 
-        // Đọc byte từ cha
-        read(parent2child[0], buf, 1);
-        printf("%d: received ping\n", getpid());
+        close(p2[0]); // Close unused read end of p2
+        write(p2[1], "pong", 4); // Send response
+        close(p2[1]);
 
-        // Gửi lại byte cho cha
-        write(child2parent[1], buf, 1);
-
-        // Đóng phần còn lại và thoát
-        close(parent2child[0]);
-        close(child2parent[1]);
         exit(0);
-    } else 
-    {
-        // --- Parent ---
-        char buf[1] = {'P'};
+    } else {
+        // --- Parent process ---
+        close(p1[0]); // Close unused read end of p1
+        write(p1[1], "ping", 4); // Send message
+        close(p1[1]);
 
-        // Đóng các đầu không dùng để tránh deadlock
-        close(parent2child[0]); // đóng đầu đọc của parent2child
-        close(child2parent[1]); // đóng đầu ghi của child2parent
+        close(p2[1]); // Close unused write end of p2
+        read(p2[0], recv_buf, 4); // Read response
+        recv_buf[4] = '\0';
+        close(p2[0]);
 
-        // Gửi byte cho con
-        write(parent2child[1], buf, 1);
+        printf("%d: received %s\n", getpid(), recv_buf);
 
-        // Đọc lại byte từ con
-        read(child2parent[0], buf, 1);
-        printf("%d: received pong\n", getpid());
-
-        // Đóng phần còn lại
-        close(parent2child[1]);
-        close(child2parent[0]);
-        wait(0); // chờ và reap child process
+        wait(&status);
         exit(0);
     }
 }

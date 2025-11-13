@@ -196,6 +196,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_first_test\
 	$U/_pingpong\
+	$U/_primes\
 	$U/_find\
 	$U/_trace\
 	$U/_xargs\
