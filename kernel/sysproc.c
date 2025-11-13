@@ -100,3 +100,18 @@ sys_trace(void)
   myproc()->tracemask = mask;
   return 0;
 }
+
+//syscal sysinfo
+#include "sysinfo.h"
+uint64 sys_sysinfo(void){
+    struct sysinfo info;
+    info.freemem = get_freemem();
+    info.nproc = count_procs();
+    //Lấy địa chỉ user-space truyền vào
+    uint64 addr;
+    //Lấy địa chỉ đối số từ user-space
+    argaddr(0, &addr);
+    // Sao chép kết quả ra user-space
+    if (copyout(myproc()->pagetable, addr, (char *)&info, sizeof(info)) < 0) return -1;
+    return 0;
+}
