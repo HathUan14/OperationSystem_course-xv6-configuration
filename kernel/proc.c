@@ -296,6 +296,9 @@ fork(void)
   }
   np->sz = p->sz;
 
+  // Copy trace mark from parent to child (use for trace syscall)
+  np->tracemask = p->tracemask;
+
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
