@@ -24,6 +24,9 @@ int sleep(int);
 int uptime(void);
 int trace(int mask);
 
+#include "kernel/sysinfo.h"
+int sysinfo(struct sysinfo *info);
+
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
@@ -42,3 +45,4 @@ void *memcpy(void *, const void *, uint);
 // umalloc.c
 void* malloc(uint);
 void free(void*);
+
