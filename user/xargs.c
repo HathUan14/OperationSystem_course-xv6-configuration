@@ -2,6 +2,7 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
+//Định nghia các hằng số
 #define MAX_ARGS 32
 #define MAX_BUFFER 512
 int main(int argc, char * argv[]){
